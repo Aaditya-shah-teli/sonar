@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sonar Rock vs Mine Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sonar Rock vs Mine Predictor</h1>
+    <p>Enter 60 sonar readings separated by commas:</p>
+    <textarea id="features" placeholder="0.0209, 0.0371, ..."></textarea><br>
+    <button onclick="predict()">Predict</button>
+
+    <div id="result"></div>
+
+    <script>
+        async function predict() {
+            const featuresText = document.getElementById("features").value;
+            const featuresArray = featuresText.split(',').map(Number);
+
+            if (featuresArray.length !== 60) {
+                alert("Please enter exactly 60 numerical values.");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ features: featuresArray })
+                });
+
+                const data = await response.json();
+                document.getElementById("result").innerHTML = `
+                    Prediction: ${data.prediction} <br>
+                    Probabilities: Rock (R): ${data.probabilities["Rock (R)"]}, Mine (M): ${data.probabilities["Mine (M)"]}
+                `;
+            } catch (error) {x
+                console.error(error);
+                document.getElementById("result").innerText = "Error making prediction.";
+            }
+        }
+    </script>
+</body>
+</html>
